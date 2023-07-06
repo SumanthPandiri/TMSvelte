@@ -158,6 +158,14 @@ export const TeachableWrapper = {
                 onTrainEnd: async () => {
                     console.log("Training has ended!");
 
+                    /**
+                     * Training has ended, and now we can save the model. The model is saved to localstorage (as a cookie essentially).
+                     * This can be viewed by opening up DevTools in Chrome and looking under the "application" tab. Then, under "storage", you
+                     * should see a "local storage" tab with the url of the localhost running. Then, you can see the model saved there.
+                     * 
+                     * This still isnt giving us exactly what we want, but looks to be really close. 
+                     */
+
                     let modelSave = await mn.asSequentialModel.save('localstorage://my-model');
 		            console.log(modelSave);
                 }
