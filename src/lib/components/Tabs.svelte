@@ -1,9 +1,9 @@
 <!--
- /src/routes/+page.svelte
- +page.svelte
+ /src/lib/components/Tabs.svelte
+ Tabs.svelte
  teachable-svelte
  
- Created by Ian Thompson on December 28th 2022
+ Created by Ian Thompson on July 7th 2023
  icthomp@clemson.edu
  ianthompson@nicelion.com
  
@@ -34,36 +34,51 @@
 --->
 
 
-<script lang="ts">
-	import { onMount } from 'svelte';
-	import { TeachableWrapper } from '../util/TM';
-	import Class from '../lib/components/Class.svelte';
-	import type { Classification } from '$lib/types';
-	import Tabs from '$lib/components/Tabs.svelte';
-	import CreateModel from '$lib/components/CreateModel.svelte';
-	import About from '$lib/components/About.svelte';
-	import Train from '$lib/components/Train.svelte';
+<script>
 
-	let classifications: [Classification] = []
+    import {createEventDispatcher} from 'svelte';
+    const dispatch = createEventDispatcher();
 
-
-	// Tabs
-	let items = ['Create Model', "Train", 'Test', "About"];
-	let activeItem = 'Create Model';
-
-	const tabChange = (e) => {
-		activeItem = e.detail;
-	};
-
+    export let items;
+    export let activeItem;
 
 </script>
 
-<Tabs  {activeItem} {items} on:tabChange={tabChange} />
+<div class="mt-2 p-2 text-white">
+    <ul>
+        {#each items as item}
+            <li on:click={() => dispatch('tabChange', item)}>
+                <div class:active={item === activeItem}>{item}</div>
+            </li>
+        {/each}
+    </ul>
 
-{#if activeItem == "Create Model"}
-	<CreateModel bind:classifications={classifications} on:trainModel={() => activeItem = "Train"}/>
-{:else if activeItem == "Train"}
-	<Train {classifications} />
-{:else if activeItem == "About"}
-	<About />
-{/if}
+</div>
+
+
+<style>
+
+    li:hover {
+        opacity: 0.6;
+    }
+
+    ul {
+        display: flex;
+        justify-content: center;
+        padding: 0;
+        list-style-type: none;
+    }
+
+    li {
+        margin: 0 16px;
+        font-size: 18px;
+        /* color: #555; */
+        cursor: pointer;
+    }
+
+    .active {
+        /* color: #36A9E7; */
+        border-bottom: 2px solid #36A9E7;
+        /* padding-bottom: 8px; */
+    }
+</style>

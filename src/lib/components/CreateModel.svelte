@@ -1,9 +1,9 @@
 <!--
- /src/routes/+page.svelte
- +page.svelte
+ /src/lib/components/CreateModel.svelte
+ CreateModel.svelte
  teachable-svelte
  
- Created by Ian Thompson on December 28th 2022
+ Created by Ian Thompson on July 7th 2023
  icthomp@clemson.edu
  ianthompson@nicelion.com
  
@@ -34,36 +34,37 @@
 --->
 
 
+
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { TeachableWrapper } from '../util/TM';
-	import Class from '../lib/components/Class.svelte';
+    import { createEventDispatcher } from 'svelte';
+    const dispatch = createEventDispatcher();
+    
+    import Class from '$lib/components/Class.svelte';
 	import type { Classification } from '$lib/types';
-	import Tabs from '$lib/components/Tabs.svelte';
-	import CreateModel from '$lib/components/CreateModel.svelte';
-	import About from '$lib/components/About.svelte';
-	import Train from '$lib/components/Train.svelte';
+    
+    export let classifications: [Classification] = []
 
-	let classifications: [Classification] = []
+    const handleAddClass = () => {
+		classifications = [...classifications, {
+			name: "",
+			trainingData: []
+		}]
+	}
 
-
-	// Tabs
-	let items = ['Create Model', "Train", 'Test', "About"];
-	let activeItem = 'Create Model';
-
-	const tabChange = (e) => {
-		activeItem = e.detail;
-	};
+    const handleTrainModel = () => {
+        dispatch("trainModel")
+    }
 
 
 </script>
 
-<Tabs  {activeItem} {items} on:tabChange={tabChange} />
-
-{#if activeItem == "Create Model"}
-	<CreateModel bind:classifications={classifications} on:trainModel={() => activeItem = "Train"}/>
-{:else if activeItem == "Train"}
-	<Train {classifications} />
-{:else if activeItem == "About"}
-	<About />
-{/if}
+<div class="flex flex-col justify-between space-y-4 p-8">
+	<h2 class="w-full text-left text-3xl">Create Your Classes</h2>
+	<div class="flex w-full flex-col space-y-6">
+		{#each classifications as classification, index}
+			<Class bind:classification={classification} {index} />
+		{/each}
+	</div>
+	<button class="btn-primary btn" on:click={handleAddClass}>Add Class</button>
+	<button class="btn-success btn" on:click={handleTrainModel}>Train Model</button>
+</div>

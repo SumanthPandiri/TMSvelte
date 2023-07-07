@@ -1,9 +1,9 @@
-<!--
- /src/routes/+page.svelte
- +page.svelte
+/**
+ /src/lib/types/index.ts
+ index.ts
  teachable-svelte
  
- Created by Ian Thompson on December 28th 2022
+ Created by Ian Thompson on July 7th 2023
  icthomp@clemson.edu
  ianthompson@nicelion.com
  
@@ -31,39 +31,10 @@
  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
---->
+*/
 
 
-<script lang="ts">
-	import { onMount } from 'svelte';
-	import { TeachableWrapper } from '../util/TM';
-	import Class from '../lib/components/Class.svelte';
-	import type { Classification } from '$lib/types';
-	import Tabs from '$lib/components/Tabs.svelte';
-	import CreateModel from '$lib/components/CreateModel.svelte';
-	import About from '$lib/components/About.svelte';
-	import Train from '$lib/components/Train.svelte';
-
-	let classifications: [Classification] = []
-
-
-	// Tabs
-	let items = ['Create Model', "Train", 'Test', "About"];
-	let activeItem = 'Create Model';
-
-	const tabChange = (e) => {
-		activeItem = e.detail;
-	};
-
-
-</script>
-
-<Tabs  {activeItem} {items} on:tabChange={tabChange} />
-
-{#if activeItem == "Create Model"}
-	<CreateModel bind:classifications={classifications} on:trainModel={() => activeItem = "Train"}/>
-{:else if activeItem == "Train"}
-	<Train {classifications} />
-{:else if activeItem == "About"}
-	<About />
-{/if}
+export interface Classification {
+    trainingData: [HTMLImageElement],
+    name: string
+}
