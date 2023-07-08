@@ -32,7 +32,6 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
 --->
-
 <script lang="ts">
 	import * as tf from '@tensorflow/tfjs';
 	import * as tmImage from '@teachablemachine/image';
@@ -47,8 +46,8 @@
 
 	export let classifications: [Classification];
 
-    let trainingState: TrainingStates = TrainingStates.inactive
-    let batchIndex: number = 0
+	let trainingState: TrainingStates = TrainingStates.inactive;
+	let batchIndex: number = 0;
 
 	let logs: [string] = [];
 
@@ -82,7 +81,7 @@
 	const beginTraining = async () => {
 		addLog('Initializing TeachableMachine');
 
-        trainingState = TrainingStates.training
+		trainingState = TrainingStates.training;
 
 		let model = await tmImage.createTeachable(teachableMetadata, modelOptions);
 
@@ -114,12 +113,11 @@
 				});
 			});
 
-
 			await model.train(trainingParams, {
 				onBatchBegin: (logs) => {
 					addLog('Batch begining!');
-                    console.log("batch begin");
-                    batchIndex += 1
+					console.log('batch begin');
+					batchIndex += 1;
 				},
 				onTrainBegin: () => {
 					addLog('Training begining!');
@@ -129,11 +127,11 @@
 				},
 				onTrainEnd: () => {
 					addLog('Training ended!');
-                    trainingState = TrainingStates.finish
+					trainingState = TrainingStates.finish;
 				}
 			});
 
-            modelStore.set(model)
+			modelStore.set(model);
 
 			// let modelSave = await model.save('downloads://model');
 			// let metadata = JSON.stringify(model.getMetadata());
@@ -153,21 +151,25 @@
 	};
 </script>
 
-<div class="w-full px-5 h-full">
-    {#if trainingState == TrainingStates.inactive}
-        <button class="btn-success btn" on:click={beginTraining}>Train Model</button>
-    {:else if trainingState == TrainingStates.training}
-        <div class="w-full h-full flex flex-col items-center justify-center space-y-4">
-            <!-- <span class="loading loading-spinner loading-lg text-info" /> -->
-            <div class="radial-progress bg-success text-primary-content" style={`--value:${(batchIndex / 50) * 100};`}>{(batchIndex / 50) * 100}%</div>
+<div class="h-full w-full px-5">
+	{#if trainingState == TrainingStates.inactive}
+		<button class="btn-success btn" on:click={beginTraining}>Train Model</button>
+	{:else if trainingState == TrainingStates.training}
+		<div class="flex h-full w-full flex-col items-center justify-center space-y-4">
+			<!-- <span class="loading loading-spinner loading-lg text-info" /> -->
+			<div
+				class="radial-progress bg-success text-primary-content"
+				style={`--value:${(batchIndex / 50) * 100};`}>
+				{(batchIndex / 50) * 100}%
+			</div>
 
-            <p class="text-xl font-semibold text-content">Model is training...</p>
-            <p>{batchIndex} / 50</p>
-        </div>
-    {:else if trainingState == TrainingStates.finish}
-        <div class="flex flex-col w-full h-full">
-            <Terminal />
-        </div>
-    {/if}
+			<p class="text-content text-xl font-semibold">Model is training...</p>
+			<p>{batchIndex} / 50</p>
+		</div>
+	{:else if trainingState == TrainingStates.finish}
+		<div class="flex h-full w-full flex-col">
+			<Terminal />
+		</div>
+	{/if}
 	<!-- <Terminal {logs}/> -->
 </div>

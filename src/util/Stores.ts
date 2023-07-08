@@ -33,6 +33,6 @@
  SOFTWARE.
 */
 
-import { writable } from "svelte/store";
+import { writable } from 'svelte/store';
 
-export const modelStore = writable({})
+export const modelStore = writable({});

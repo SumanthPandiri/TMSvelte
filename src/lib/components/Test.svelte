@@ -32,67 +32,63 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
 --->
-
 <script lang="ts">
-	import { onMount } from "svelte";
-	import { modelStore } from "../../util/Stores";
+	import { onMount } from 'svelte';
+	import { modelStore } from '../../util/Stores';
 	import * as tf from '@tensorflow/tfjs';
 	import * as tmImage from '@teachablemachine/image';
-	import WebcamContainer from "./WebcamContainer.svelte";
+	import WebcamContainer from './WebcamContainer.svelte';
 
-    let model: tmImage.CustomMobileNet  = $modelStore
+	let model: tmImage.CustomMobileNet = $modelStore;
 
-    let webcam
+	let webcam;
 
-    let predictions = []
+	let predictions = [];
 
-    onMount(async () => {
-        console.log($modelStore);
-        
-        console.log(model.getClassLabels());
-        
+	onMount(async () => {
+		console.log($modelStore);
 
-        webcam = new tmImage.Webcam(200, 200, true)
-        await webcam.setup()
-        
-        document.getElementById("webcam-container").appendChild(webcam.canvas);
+		console.log(model.getClassLabels());
 
-        webcam.play()
-        window.requestAnimationFrame(loop)
-    })
+		webcam = new tmImage.Webcam(200, 200, true);
+		await webcam.setup();
 
-    const loop = async () => {
-        webcam.update(); // update the webcam frame
+		document.getElementById('webcam-container').appendChild(webcam.canvas);
 
-        await predict()
+		webcam.play();
+		window.requestAnimationFrame(loop);
+	});
 
-        window.requestAnimationFrame(loop);
+	const loop = async () => {
+		webcam.update(); // update the webcam frame
 
-    }
+		await predict();
 
-    const predict = async () => {
-        // let prediction = await model.predict(webcam.canvas)
+		window.requestAnimationFrame(loop);
+	};
 
-        predictions = await model.predict(webcam.canvas)
+	const predict = async () => {
+		// let prediction = await model.predict(webcam.canvas)
 
-        // console.log(prediction);
-        
-    }
+		predictions = await model.predict(webcam.canvas);
+
+		// console.log(prediction);
+	};
 </script>
 
-<div class="px-4 py-5 flex flex-col items-center space-y-3">
-    <!-- <WebcamContainer /> -->
-    <div id='webcam-container' class="rounded-md"></div>
+<div class="flex flex-col items-center space-y-3 px-4 py-5">
+	<!-- <WebcamContainer /> -->
+	<div id="webcam-container" class="rounded-md" />
 
-    <div class=" flex justify-center space-x-6">
-        {#each predictions as prediction}
-            <div class="flex flex-col bg-base-300 px-5 py-4 rounded-md space-y-4">
-                <p class="text-xl">{prediction.className}</p>
-                <div class="flex flex-col space-y-2">
-                    <p>Confidence: {(prediction.probability) * 100}%</p>
-                    <progress class="progress w-56" value={(prediction.probability) * 100} max="100"></progress>
-                </div>
-            </div>
-        {/each}
-    </div>
+	<div class=" flex justify-center space-x-6">
+		{#each predictions as prediction}
+			<div class="flex flex-col space-y-4 rounded-md bg-base-300 px-5 py-4">
+				<p class="text-xl">{prediction.className}</p>
+				<div class="flex flex-col space-y-2">
+					<p>Confidence: {prediction.probability * 100}%</p>
+					<progress class="progress w-56" value={prediction.probability * 100} max="100" />
+				</div>
+			</div>
+		{/each}
+	</div>
 </div>

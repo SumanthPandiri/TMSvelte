@@ -60,7 +60,7 @@
 	<CreateModel bind:classifications on:trainModel={() => (activeItem = 'Train')} />
 {:else if activeItem == 'Train'}
 	<Train {classifications} />
-{:else if activeItem == "Test"}
+{:else if activeItem == 'Test'}
 	<Test />
 {:else if activeItem == 'About'}
 	<About />
