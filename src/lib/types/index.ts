@@ -37,3 +37,10 @@ export interface Classification {
 	trainingData: [HTMLImageElement];
 	name: string;
 }
+
+export enum TrainingStates {
+	inactive,
+	training,
+	finish,
+	error
+}
