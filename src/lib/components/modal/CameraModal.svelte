@@ -12,11 +12,10 @@
 --->
 <script lang="ts">
 	import { onMount } from 'svelte';
-    import { getContext } from 'svelte';
-    const { close } = getContext('simple-modal');
+	import { getContext } from 'svelte';
+	const { close } = getContext('simple-modal');
 
-
-    export let onFinish = () => {}
+	export let onFinish = () => {};
 
 	const width = 224;
 	let height = 224;
@@ -30,12 +29,10 @@
 
 	let images: [HTMLImageElement] = [];
 
-
-    const _onFinish = () => {
-        onFinish(images)
-        close()
-    }
-
+	const _onFinish = () => {
+		onFinish(images);
+		close();
+	};
 
 	onMount(async () => {
 		try {

@@ -1,67 +1,62 @@
 /*
  * settings.json
  * teachable-svelte
- * 
+ *
  * Created by Ian Thompson on July 7th 2023
  * ianthompson@nicelion.com
  * https://www.nicelion.com
- * 
+ *
  * Copyright (c) 2023 Nice Lion Technologies LLC. All Rights Reserved.
- * 
+ *
  */
 {
-    "psi-header.license-reference": {
-    
-    },
-    "psi-header.config": {
-        "license": "MIT",
-        "author": "Ian Thompson",
-        
-    }, 
-    "psi-header.lang-config": [
-
-        {
-          "language": "javascript",
-          "begin": "/**",
-          "prefix": " ",
-          "end": "*/",
-          "blankLinesAfter": 1,
-          "forceToTop": false
-        },
-        {
-          "language": "html",
-          "begin": "<!--",
-          "prefix": " ",
-          "end": "--->",
-          "blankLinesAfter": 1
-        },
-        {
-          "language": "typescript",
-          "mapTo": "javascript"
-        }, 
-        {
-          "language": "svelte",
-          "mapTo": "html"
-        }
-      ],
-      "psi-header.templates": [
-
-        {
-          "language": "*",
-          "template": [
-            "<<filerelativepath>>",
-            "<<filename>>",
-            "<<projectName>>",
-            "",
-            "Created by <<author>> on <<filecreated('MMMM Do YYYY')>>",
-            "icthomp@clemson.edu",
-            "ianthompson@nicelion.com",
-            "",
-            "https://iancthompson.dev",
-            "https://idealab.sites.clemson.edu",
-            "",
-            "<<licensetext>>"
-          ]
-        }
-      ],
+	"psi-header.license-reference": {},
+	"psi-header.config": {
+		"license": "MIT",
+		"author": "Ian Thompson"
+	},
+	"psi-header.lang-config": [
+		{
+			"language": "javascript",
+			"begin": "/**",
+			"prefix": " ",
+			"end": "*/",
+			"blankLinesAfter": 1,
+			"forceToTop": false
+		},
+		{
+			"language": "html",
+			"begin": "<!--",
+			"prefix": " ",
+			"end": "--->",
+			"blankLinesAfter": 1
+		},
+		{
+			"language": "typescript",
+			"mapTo": "javascript"
+		},
+		{
+			"language": "svelte",
+			"mapTo": "html"
+		}
+	],
+	"psi-header.templates": [
+		{
+			"language": "*",
+			"template": [
+				"<<filerelativepath>>",
+				"<<filename>>",
+				"<<projectName>>",
+				"",
+				"Created by <<author>> on <<filecreated('MMMM Do YYYY')>>",
+				"icthomp@clemson.edu",
+				"ianthompson@nicelion.com",
+				"",
+				"https://iancthompson.dev",
+				"https://idealab.sites.clemson.edu",
+				"",
+				"<<licensetext>>"
+			]
+		}
+	]
 }

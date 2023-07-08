@@ -32,8 +32,6 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
 --->
-
-
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { TeachableWrapper } from '../util/TM';
@@ -44,26 +42,23 @@
 	import About from '$lib/components/About.svelte';
 	import Train from '$lib/components/Train.svelte';
 
-	let classifications: [Classification] = []
-
+	let classifications: [Classification] = [];
 
 	// Tabs
-	let items = ['Create Model', "Train", 'Test', "About"];
+	let items = ['Create Model', 'Train', 'Test', 'About'];
 	let activeItem = 'Create Model';
 
 	const tabChange = (e) => {
 		activeItem = e.detail;
 	};
-
-
 </script>
 
-<Tabs  {activeItem} {items} on:tabChange={tabChange} />
+<Tabs {activeItem} {items} on:tabChange={tabChange} />
 
-{#if activeItem == "Create Model"}
-	<CreateModel bind:classifications={classifications} on:trainModel={() => activeItem = "Train"}/>
-{:else if activeItem == "Train"}
+{#if activeItem == 'Create Model'}
+	<CreateModel bind:classifications on:trainModel={() => (activeItem = 'Train')} />
+{:else if activeItem == 'Train'}
 	<Train {classifications} />
-{:else if activeItem == "About"}
+{:else if activeItem == 'About'}
 	<About />
 {/if}

@@ -33,8 +33,7 @@
  SOFTWARE.
 */
 
-
 export interface Classification {
-    trainingData: [HTMLImageElement],
-    name: string
+	trainingData: [HTMLImageElement];
+	name: string;
 }

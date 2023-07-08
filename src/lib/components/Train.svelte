@@ -33,106 +33,116 @@
  SOFTWARE.
 --->
 
-
 <script lang="ts">
+	import * as tf from '@tensorflow/tfjs';
+	import * as tmImage from '@teachablemachine/image';
 
-    import * as tf from '@tensorflow/tfjs';
-    import * as tmImage from '@teachablemachine/image';
-
-	import type { Classification } from "$lib/types";
-	import type { TrainingParameters } from "@teachablemachine/image/dist/teachable-mobilenet";
-	import { onMount } from "svelte";
+	import type { Classification } from '$lib/types';
+	import type { TrainingParameters } from '@teachablemachine/image/dist/teachable-mobilenet';
+	import { onMount } from 'svelte';
 	import type { ModelOptions } from '@teachablemachine/image/dist/custom-mobilenet';
 	import Terminal from './Terminal.svelte';
 	import { cropTo } from '../../util/Canvas';
 
-    export let classifications: [Classification]
+	export let classifications: [Classification];
 
-    let logs: [string] = []
+	let logs: [string] = [];
 
-    const trainingParams: TrainingParameters = {
-        denseUnits: 100,
-        epochs: 50, 
-        learningRate: 0.001,
-        batchSize: 16
-    }
+	const trainingParams: TrainingParameters = {
+		denseUnits: 100,
+		epochs: 50,
+		learningRate: 0.001,
+		batchSize: 16
+	};
 
-    const teachableMetadata: tmImage.Metadata = {
-        tfjsVersion: tf.version.tfjs
-    }
+	const teachableMetadata: tmImage.Metadata = {
+		tfjsVersion: tf.version.tfjs
+	};
 
-    const modelOptions: ModelOptions = {
-        version: 2,
-        alpha: 0.35
-    }
+	const modelOptions: ModelOptions = {
+		version: 2,
+		alpha: 0.35
+	};
 
-    onMount(async () => {
-        addLog("Waiting for initialization\n")
-        console.log(classifications);
-        
-    })
+	onMount(async () => {
+		addLog('Waiting for initialization\n');
+		console.log(classifications);
+	});
 
-    const beginTraining = async () => {
-        addLog("Initializing TeachableMachine")
+	// const setLabels = (model) => {
+	//     return new Promise((resolve, reject) => {
 
-        let model = await tmImage.createTeachable(teachableMetadata, modelOptions )
+	//     });
+	// }
 
-        
-        classifications.forEach((classification, i) => {
-            addLog(`Setting label ${i} to ${classification.name}`)
-            model.setLabel(i, classification.name)
-        })
+	const beginTraining = async () => {
+		addLog('Initializing TeachableMachine');
 
-        await tf.nextFrame().then(async () => {
-            addLog("")
-            addLog("Running tf.nextFrame()")
+		let model = await tmImage.createTeachable(teachableMetadata, modelOptions);
 
-            classifications.forEach(async (c, i) => {
-                c.trainingData.forEach(async (trainingImage, j) => {
-                    addLog(`Adding training image ${j} of ${c.trainingData.length} as an example for ${c.name}.`)
+		model.setLabels(['face', 'no face']);
 
-                    
-                    // let croppedImage = cropTo(trainingImage, 224, false)
-                    // console.log(croppedImage);
-                    
-                    // console.log(trainingImage)
+		// classifications.forEach((classification, i) => {
+		//     addLog(`Setting label ${i} to ${classification.name}`)
+		//     model.setLabel(i, classification.name)
+		// })
 
-                    console.log(i);
-                    
-                    await model.addExample(i, trainingImage)
-                })
+		console.log(model.getLabels());
 
-                addLog("")
-            })
+		let img = new Image();
+		img.src = '/face/0.png';
 
-            await model.train(trainingParams, {
-                onBatchBegin: () => {
-                    addLog("Batch begining!")
-                }, 
-                onTrainBegin: () => {
-                    addLog("Training begining!")
-                }, 
-                onBatchEnd: () => {
-                    addLog("Batch ended!")
-                }, 
-                onTrainEnd: () => {
-                    addLog("Training ended!")
-                }
-            })
+		await tf.nextFrame().then(async () => {
+			addLog('');
+			addLog('Running tf.nextFrame()');
 
-        })
+			classifications.forEach(async (classObject, classIndex) => {
+				console.log(classObject);
 
+				model.setLabel(classIndex, classObject.name);
 
-    }
+				classObject.trainingData.forEach(async (image) => {
+					console.log(`${classObject.name} with ${image}`);
 
-    const addLog = (message: string) => {
-        logs = [...logs, message]
-    }
+					await model.addExample(classIndex, image);
+				});
+			});
 
+			await model.train(trainingParams, {
+				onBatchBegin: (logs) => {
+					addLog('Batch begining!');
+				},
+				onTrainBegin: () => {
+					addLog('Training begining!');
+				},
+				onBatchEnd: () => {
+					addLog('Batch ended!');
+				},
+				onTrainEnd: () => {
+					addLog('Training ended!');
+				}
+			});
+
+			let modelSave = await model.save('downloads://model');
+			let metadata = JSON.stringify(model.getMetadata());
+
+			var a = document.createElement('a');
+			document.body.appendChild(a);
+			var blob = new Blob([metadata], { type: 'text/json' }); // the blob
+			var url = window.URL.createObjectURL(blob);
+			a.href = url;
+			a.download = 'metadata.json';
+			a.click();
+		});
+	};
+
+	const addLog = (message: string) => {
+		logs = [...logs, message];
+	};
 </script>
 
 <div class="w-full px-5">
-    <button class="btn btn-success" on:click={beginTraining}>Train Model</button>
-    <span class="loading loading-spinner text-info loading-lg"></span>
-    <Terminal {logs}/>
+	<button class="btn-success btn" on:click={beginTraining}>Train Model</button>
+	<span class="loading loading-spinner loading-lg text-info" />
+	<!-- <Terminal {logs}/> -->
 </div>

@@ -32,16 +32,15 @@
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  SOFTWARE.
 --->
-
 <script lang="ts">
-    export let logs: [string] = []
+	export let logs: [string] = [];
 </script>
 
 <div class="mockup-code">
-    {#each logs as log}
-        <pre class="text-warning"><code>{log}</code></pre> 
-    {/each}
-    <!-- <pre data-prefix="$"><code>npm i daisyui</code></pre> 
+	{#each logs as log}
+		<pre class="text-warning"><code>{log}</code></pre>
+	{/each}
+	<!-- <pre data-prefix="$"><code>npm i daisyui</code></pre> 
     <pre data-prefix=">" class="text-warning"><code>installing...</code></pre> 
     <pre data-prefix=">" class="text-success"><code>Done!</code></pre> -->
-  </div>
+</div>
