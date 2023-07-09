@@ -70,9 +70,14 @@
 	const predict = async () => {
 		// let prediction = await model.predict(webcam.canvas)
 
-		predictions = await model.predict(webcam.canvas);
+		// let tempPredicitons = await model.predict(webcam.canvas);
 
-		// console.log(prediction);
+		// tempPredicitons.map((prediciton) => {
+		//     // console.log(prediciton);
+		//     prediciton.probability = Math.round(prediciton.probability * 100) / 100
+		// })
+
+		predictions = await model.predict(webcam.canvas);
 	};
 </script>
 
@@ -80,13 +85,18 @@
 	<!-- <WebcamContainer /> -->
 	<div id="webcam-container" class="rounded-md" />
 
-	<div class=" flex justify-center space-x-6">
+	<div class=" flex w-full justify-center space-x-6">
 		{#each predictions as prediction}
-			<div class="flex flex-col space-y-4 rounded-md bg-base-300 px-5 py-4">
+			<div class="flex w-1/2 flex-col space-y-4 rounded-md bg-base-300 px-5 py-4">
 				<p class="text-xl">{prediction.className}</p>
-				<div class="flex flex-col space-y-2">
+				<div class="flex w-full flex-col space-y-2">
 					<p>Confidence: {prediction.probability * 100}%</p>
-					<progress class="progress w-56" value={prediction.probability * 100} max="100" />
+					<progress
+						class={`progress w-56 ${
+							prediction.probability <= 0.5 ? 'progress-error' : 'progress-success'
+						}`}
+						value={prediction.probability * 100}
+						max="100" />
 				</div>
 			</div>
 		{/each}

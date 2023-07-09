@@ -46,10 +46,11 @@
 
 	export let classifications: [Classification];
 
+	/**
+	 * Track the training state
+	 */
 	let trainingState: TrainingStates = TrainingStates.inactive;
 	let batchIndex: number = 0;
-
-	let logs: [string] = [];
 
 	const trainingParams: TrainingParameters = {
 		denseUnits: 100,
@@ -68,44 +69,41 @@
 	};
 
 	onMount(async () => {
-		addLog('Waiting for initialization\n');
 		console.log(classifications);
 	});
 
-	// const setLabels = (model) => {
-	//     return new Promise((resolve, reject) => {
-
-	//     });
-	// }
-
 	const beginTraining = async () => {
-		addLog('Initializing TeachableMachine');
-
+		// Training has begun, we will update the training state
 		trainingState = TrainingStates.training;
 
-		let model = await tmImage.createTeachable(teachableMetadata, modelOptions);
+		// Initialize the TeachableMobileNet with metadata and model options defined abovee
+		let model: tmImage.TeachableMobileNet = await tmImage.createTeachable(
+			teachableMetadata,
+			modelOptions
+		);
 
-		model.setLabels(['face', 'no face']);
-
-		// classifications.forEach((classification, i) => {
-		//     addLog(`Setting label ${i} to ${classification.name}`)
-		//     model.setLabel(i, classification.name)
-		// })
-
-		console.log(model.getLabels());
-
-		let img = new Image();
-		img.src = '/face/0.png';
+		/**
+		 * Create a labels variable. Map will run on the classifications array and place each element in the temporary x variable. We
+		 * then return x.name property to a new array housed in the labels variable.
+		 *
+		 * Then, we set the model's labels to the array we have just created.
+		 */
+		let labels = classifications.map((x) => x.name);
+		model.setLabels(labels);
 
 		await tf.nextFrame().then(async () => {
-			addLog('');
-			addLog('Running tf.nextFrame()');
-
+			/**
+			 * Loop through each of the training classes and grab the class and class index.
+			 */
 			classifications.forEach(async (classObject, classIndex) => {
 				console.log(classObject);
 
-				model.setLabel(classIndex, classObject.name);
-
+				/**
+				 * We will now access each of the training images and then add them as an example to the model
+				 *
+				 * Images should conform to a specific criteria. We should probable check that it conforms here,
+				 * but i am not yet.
+				 */
 				classObject.trainingData.forEach(async (image) => {
 					console.log(`${classObject.name} with ${image}`);
 
@@ -113,24 +111,27 @@
 				});
 			});
 
+			/**
+			 * Now, we will actually train the model with the proper training parameters. There are
+			 * event callbacks we can access here, but really the only one were worried about now is the
+			 * onTrainingEnd() which gets called when the training has finished. Here, we can set the training
+			 * state accordingly.
+			 */
 			await model.train(trainingParams, {
 				onBatchBegin: (logs) => {
-					addLog('Batch begining!');
 					console.log('batch begin');
 					batchIndex += 1;
 				},
-				onTrainBegin: () => {
-					addLog('Training begining!');
-				},
-				onBatchEnd: () => {
-					addLog('Batch ended!');
-				},
+				onTrainBegin: () => {},
+				onBatchEnd: () => {},
 				onTrainEnd: () => {
-					addLog('Training ended!');
 					trainingState = TrainingStates.finish;
 				}
 			});
 
+			/**
+			 * We have created a model store and now we are setting it's data to the model we have just trained.
+			 */
 			modelStore.set(model);
 
 			// let modelSave = await model.save('downloads://model');
@@ -144,10 +145,6 @@
 			// a.download = 'metadata.json';
 			// a.click();
 		});
-	};
-
-	const addLog = (message: string) => {
-		logs = [...logs, message];
 	};
 </script>
 
