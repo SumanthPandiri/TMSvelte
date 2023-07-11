@@ -54,7 +54,7 @@
 		application. This demo project shows how to consume the API and is a great starting point for
 		utilizing TeachableMachine in your own application.
 	</p>
-	<p>
+	<!-- <p>
 		This project was created by <a
 			href="https://www.iancthompson.dev"
 			class="text-blue-400 hover:underline">Ian Thompson</a>
@@ -62,7 +62,7 @@
 		<a href="https://idealab.sites.clemson.edu/" class="text-blue-400 hover:underline"
 			>IDEA Lab @ Clemson University</a
 		>.
-	</p>
+	</p> -->
 	<h2 class="text-4xl font-bold">License</h2>
 	<p>
 		MIT License Copyright (c) 2023 Nice Lion Technologies LLC Permission is hereby granted, free of
