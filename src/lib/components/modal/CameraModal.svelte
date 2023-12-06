@@ -2,13 +2,6 @@
  CameraModal.svelte
  sveltekit-tailwind-starter-template
  
- Created by Ian Thompson on July 7th 2023
- ianthompson@nicelion.com
- https://www.nicelion.com
- 
- Copyright (c) 2023 Nice Lion Technologies LLC. All Rights Reserved.
- 
- A lot of this code was inspired by https://developer.mozilla.org/en-US/docs/Web/API/Media_Capture_and_Streams_API/Taking_still_photos
 --->
 <script lang="ts">
 	import { onMount } from 'svelte';

@@ -3,46 +3,18 @@
  Train.svelte
  teachable-svelte
  
- Created by Ian Thompson on July 7th 2023
- icthomp@clemson.edu
- ianthompson@nicelion.com
- 
- https://iancthompson.dev
- https://idealab.sites.clemson.edu
- 
- MIT License
- 
- Copyright (c) 2023 Nice Lion Technologies LLC
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy of
- this software and associated documentation files (the "Software"), to deal in
- the Software without restriction, including without limitation the rights to
- use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- of the Software, and to permit persons to whom the Software is furnished to do
- so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in all
- copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- SOFTWARE.
 --->
 <script lang="ts">
 	import * as tf from '@tensorflow/tfjs';
-	import * as tmImage from '@teachablemachine/image';
+	//import * as tmImage from '@teachablemachine/image';
 
 	import { TrainingStates, type Classification } from '$lib/types';
-	import type { TrainingParameters } from '@teachablemachine/image/dist/teachable-mobilenet';
+	//import type { TrainingParameters } from '@teachablemachine/image/dist/teachable-mobilenet';
 	import { onMount } from 'svelte';
-	import type { ModelOptions } from '@teachablemachine/image/dist/custom-mobilenet';
+	//import type { ModelOptions } from '@teachablemachine/image/dist/custom-mobilenet';
 	import Terminal from './Terminal.svelte';
 	import { cropTo } from '../../util/Canvas';
-	import { modelStore } from '../../util/Stores';
+	import { modelStore, labelsStore } from '../../util/Stores';
 
 	export let classifications: [Classification];
 
@@ -52,51 +24,69 @@
 	let trainingState: TrainingStates = TrainingStates.inactive;
 	let batchIndex: number = 0;
 
-	const trainingParams: TrainingParameters = {
-		denseUnits: 100,
-		epochs: 50,
-		learningRate: 0.001,
-		batchSize: 16
-	};
-
-	const teachableMetadata: tmImage.Metadata = {
-		tfjsVersion: tf.version.tfjs
-	};
-
-	const modelOptions: ModelOptions = {
-		version: 2,
-		alpha: 0.35
-	};
 
 	onMount(async () => {
-		console.log(classifications);
+		console.log("YUH " + classifications);
 	});
 
 	const beginTraining = async () => {
 		// Training has begun, we will update the training state
 		trainingState = TrainingStates.training;
 
-		// Initialize the TeachableMobileNet with metadata and model options defined abovee
-		let model: tmImage.TeachableMobileNet = await tmImage.createTeachable(
-			teachableMetadata,
-			modelOptions
-		);
+        let labels = classifications.map((x) => x.name);
+        labelsStore.set(labels);
 
-		/**
-		 * Create a labels variable. Map will run on the classifications array and place each element in the temporary x variable. We
-		 * then return x.name property to a new array housed in the labels variable.
-		 *
-		 * Then, we set the model's labels to the array we have just created.
-		 */
-		let labels = classifications.map((x) => x.name);
-		model.setLabels(labels);
+        //loads in the mobilenet model from a url -- we can change this later
+        const URL =
+        "https://tfhub.dev/google/tfjs-model/imagenet/mobilenet_v3_small_100_224/feature_vector/5/default/1";
+  
+        let mobilenet = await tf.loadGraphModel(URL, { fromTFHub: true });
+    
+        // // Warm up the model by passing zeros through it once.
+        // tf.tidy(function () {
+        //     let answer = mobilenet.predict(
+        //         tf.zeros([1, 224, 224, 3])
+        //     );
+        //     console.log(answer.shape);
+        // });
 
-		await tf.nextFrame().then(async () => {
+        let model = tf.sequential();
+        model.add(
+            tf.layers.dense({ inputShape: [1024], units: 128, activation: "relu" })
+        );
+        model.add(
+            tf.layers.dense({ units: labels.length, activation: "softmax" })
+        );
+
+       //model.summary();
+
+        // Compile the model with the defined optimizer and specify a loss function to use.
+        model.compile({
+        // Adam changes the learning rate over time which is useful.
+            optimizer: "adam",
+        // Use the correct loss function. If 2 classes of data, must use binaryCrossentropy.
+        // Else categoricalCrossentropy is used if more than 2 classes.
+            loss: "categoricalCrossentropy",
+        // As this is a classification problem you can record accuracy in the logs too!
+            metrics: ["accuracy"],
+        });
+
+        console.log("Compiled model");
+        
+
+
+        await tf.nextFrame().then(async () => {
 			/**
 			 * Loop through each of the training classes and grab the class and class index.
 			 */
+
+            let trainingdata = [];
+            let outputdata = [];
+
 			classifications.forEach(async (classObject, classIndex) => {
-				console.log(classObject);
+                console.log("Next frame");
+
+				//console.log(classObject);
 
 				/**
 				 * We will now access each of the training images and then add them as an example to the model
@@ -105,11 +95,51 @@
 				 * but i am not yet.
 				 */
 				classObject.trainingData.forEach(async (image) => {
-					console.log(`${classObject.name} with ${image}`);
+                    const rimage = tf.browser.fromPixels(image);
+                    let resizedTensorFrame = tf.image.resizeBilinear(
+                        rimage, [224, 224], true);
+                    let normalizedTensorFrame = resizedTensorFrame.div(255);
+                    let features = undefined;
+                    features = mobilenet.predict(normalizedTensorFrame.expandDims()).squeeze();
 
-					await model.addExample(classIndex, image);
+                    trainingdata.push(features);
+                    outputdata.push(classObject.name);
+                    console.log(classObject.name);
+                    
+
+					//console.log(`${classObject.name} with ${image}`);
+
 				});
 			});
+
+            console.log("ON TO TRAINING");
+            
+            var index = trainingdata.length;
+            var rnd, tmp1, tmp2;
+
+            while (index) {
+                rnd = Math.floor(Math.random() * index);
+                index -= 1;
+                tmp1 = trainingdata[index];
+                tmp2 = outputdata[index];
+                trainingdata[index] = trainingdata[rnd];
+                outputdata[index] = outputdata[rnd];
+                trainingdata[rnd] = tmp1;
+                outputdata[rnd] = tmp2;
+            }
+            let outputsAsTensor = tf.tensor1d(outputdata, "int32");
+            let oneHotOutputs = tf.oneHot(outputsAsTensor, labels.length);
+            let inputsAsTensor = tf.stack(trainingdata);
+        
+            let results = await model.fit(inputsAsTensor, oneHotOutputs, {
+                shuffle: true,
+                batchSize: 16,
+                epochs: 50
+            });
+            batchIndex = 100;
+            modelStore.set(model);
+            console.log("Finished training");
+            trainingState = TrainingStates.finish;
 
 			/**
 			 * Now, we will actually train the model with the proper training parameters. There are
@@ -117,22 +147,10 @@
 			 * onTrainingEnd() which gets called when the training has finished. Here, we can set the training
 			 * state accordingly.
 			 */
-			await model.train(trainingParams, {
-				onBatchBegin: (logs) => {
-					console.log('batch begin');
-					batchIndex += 1;
-				},
-				onTrainBegin: () => {},
-				onBatchEnd: () => {},
-				onTrainEnd: () => {
-					trainingState = TrainingStates.finish;
-				}
-			});
+        
 
-			/**
-			 * We have created a model store and now we are setting it's data to the model we have just trained.
-			 */
-			modelStore.set(model);
+        });
+        
 
 			// let modelSave = await model.save('downloads://model');
 			// let metadata = JSON.stringify(model.getMetadata());
@@ -144,7 +162,7 @@
 			// a.href = url;
 			// a.download = 'metadata.json';
 			// a.click();
-		});
+		
 	};
 </script>
 
@@ -165,7 +183,8 @@
 		</div>
 	{:else if trainingState == TrainingStates.finish}
 		<div class="flex h-full w-full flex-col">
-			<Terminal />
+            <p class="text-content text-xl font-semibold">Model is done training!</p>
+			<!-- <Terminal /> -->
 		</div>
 	{/if}
 	<!-- <Terminal {logs}/> -->

@@ -1,6 +1,6 @@
 # Teachable Svelte
 
-This is an example project of using and creating Teachable Machine models in Svelte. It is really more of a wrapper than anything, and doesn't really require svelte yet.
+This is an example project of using and creating Teachable Machine models in Svelte.
 
 ## Installing
 

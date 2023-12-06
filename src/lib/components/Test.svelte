@@ -3,102 +3,143 @@
  Test.svelte
  teachable-svelte
  
- Created by Ian Thompson on July 8th 2023
- icthomp@clemson.edu
- ianthompson@nicelion.com
- 
- https://iancthompson.dev
- https://idealab.sites.clemson.edu
- 
- MIT License
- 
- Copyright (c) 2023 Nice Lion Technologies LLC
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy of
- this software and associated documentation files (the "Software"), to deal in
- the Software without restriction, including without limitation the rights to
- use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- of the Software, and to permit persons to whom the Software is furnished to do
- so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in all
- copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- SOFTWARE.
 --->
 <script lang="ts">
+	import type { Classification } from '$lib/types';
 	import { onMount } from 'svelte';
-	import { modelStore } from '../../util/Stores';
+	import { modelStore, labelsStore} from '../../util/Stores';
 	import * as tf from '@tensorflow/tfjs';
-	import * as tmImage from '@teachablemachine/image';
-	import WebcamContainer from './WebcamContainer.svelte';
+	//import * as tmImage from '@teachablemachine/image';
 
-	let model: tmImage.CustomMobileNet = $modelStore;
+    let VIDEO = document.getElementById("webcam");
 
-	let webcam;
 
-	let predictions = [];
+    export let classification: [Classification];
 
-	onMount(async () => {
-		console.log($modelStore);
+	let model = $modelStore;
+    let labels;
+    labelsStore.subscribe((value) => {
+        labels = value;
+    });
 
-		console.log(model.getClassLabels());
+    console.log($modelStore);
 
-		webcam = new tmImage.Webcam(200, 200, true);
-		await webcam.setup();
+    const URL =
+    "https://tfhub.dev/google/tfjs-model/imagenet/mobilenet_v3_small_100_224/feature_vector/5/default/1";
 
-		document.getElementById('webcam-container').appendChild(webcam.canvas);
+    let mobilenet;
 
-		webcam.play();
-		window.requestAnimationFrame(loop);
-	});
+	let prediction;
+    let percent = 0.5;
 
-	const loop = async () => {
-		webcam.update(); // update the webcam frame
 
-		await predict();
+  
+    function enableCam() {
+    // checks if they have the media device
+        if (!!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia)) {
+            // getUsermedia parameters.
+            const constraints = {
+            video: true,
+            width: 640,
+            height: 480,
+            };
 
-		window.requestAnimationFrame(loop);
-	};
+            // Activate the webcam stream.
+            navigator.mediaDevices.getUserMedia(constraints).then(
+            function (stream) {
+            VIDEO.srcObject = stream;
+            VIDEO.play();
+            
+            }
+            );
+        } else {
+            console.warn("getUserMedia() is not supported by your browser");
+        }
+    }
 
-	const predict = async () => {
-		// let prediction = await model.predict(webcam.canvas)
+    function delay(milliseconds){
+        return new Promise(resolve => {
+            setTimeout(resolve, milliseconds);
+        });
+    }
+    onMount(async () => {
+        enableCam();
+        mobilenet = await tf.loadGraphModel(URL, { fromTFHub: true });
+        processVideo();
+        console.log(" Labels " + labels);
+        
+    });
+	// const loop = async () => {
 
-		// let tempPredicitons = await model.predict(webcam.canvas);
+    //     while (VIDEO.srcObject) {
+    //         tf.tidy(function () {
+    //         let videoFrameAsTensor = tf.browser.fromPixels(VIDEO).div(255);
+    //         let resizedTensorFrame = tf.image.resizeBilinear(
+    //             videoFrameAsTensor,
+    //             [224, 224],
+    //             true
+    //       );
+    
+    //         let imageFeatures = mobilenet.predict(resizedTensorFrame.expandDims());
+    //         let prediction = model.predict(imageFeatures).squeeze();
+    //         let highestIndex = prediction.argMax().arraySync();
+    //         let predictionArray = prediction.arraySync();
+    
+    //         prediction =
+    //             "Prediction: " +
+    //             highestIndex +
+    //             "% confidence";
+            
+    //     });
+	//     }
+    // };
+    const processVideo = async () => {
+            while (VIDEO && VIDEO.srcObject) {
+                await tf.nextFrame();
 
-		// tempPredicitons.map((prediciton) => {
-		//     // console.log(prediciton);
-		//     prediciton.probability = Math.round(prediciton.probability * 100) / 100
-		// })
+                let videoFrameAsTensor = tf.browser.fromPixels(VIDEO).div(255);
 
-		predictions = await model.predict(webcam.canvas);
-	};
+                let resizedTensorFrame = tf.image.resizeBilinear(
+                    videoFrameAsTensor,
+                    [224, 224],
+                    true
+                );
+
+
+                let imageFeatures = mobilenet.predict(resizedTensorFrame.expandDims());
+                console.log(imageFeatures.shape);
+                let predictionTensor = model.predict(imageFeatures).squeeze();
+                console.log(predictionTensor.array());
+                let highestIndex = predictionTensor.argMax().arraySync();
+                console.log(highestIndex);
+                percent = predictionTensor.arraySync()[highestIndex];
+
+                prediction = `Prediction: ${labels[highestIndex]}`;
+                console.log(prediction);
+                await delay (1001);
+            }
+        };
+
+    processVideo(); // Start processing video when the component mounts
+    
+        
 </script>
 
 <div class="flex flex-col items-center space-y-3 px-4 py-5">
-	<!-- <WebcamContainer /> -->
-	<div id="webcam-container" class="rounded-md" />
+    <video bind:this={VIDEO} class="rounded-md"></video>
 
 	<div class=" flex w-full justify-center space-x-6">
-		{#each predictions as prediction}
-			<div class="flex w-1/2 flex-col space-y-4 rounded-md bg-base-300 px-5 py-4">
-				<p class="text-xl">{prediction.className}</p>
-				<div class="flex w-full flex-col space-y-2">
-					<p>Confidence: {prediction.probability * 100}%</p>
-					<progress
-						class={`progress w-56 ${
-							prediction.probability <= 0.5 ? 'progress-error' : 'progress-success'
-						}`}
-						value={prediction.probability * 100}
-						max="100" />
-				</div>
-			</div>
-		{/each}
+        <div class="flex w-1/2 flex-col space-y-4 rounded-md bg-base-300 px-5 py-4">
+            <p class="text-xl">{prediction}</p>
+            <div class="flex w-full flex-col space-y-2">
+                <p>Confidence: {percent * 100}%</p>
+                <progress
+                    class={`progress w-56 ${
+                        percent <= 0.5 ? 'progress-error' : 'progress-success'
+                    }`}
+                    value={percent * 100}
+                    max="100" />
+            </div>
+        </div>
 	</div>
 </div>

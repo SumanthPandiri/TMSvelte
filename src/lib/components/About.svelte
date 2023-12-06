@@ -3,34 +3,7 @@
  About.svelte
  teachable-svelte
  
- Created by Ian Thompson on July 7th 2023
- icthomp@clemson.edu
- ianthompson@nicelion.com
  
- https://iancthompson.dev
- https://idealab.sites.clemson.edu
- 
- MIT License
- 
- Copyright (c) 2023 Nice Lion Technologies LLC
- 
- Permission is hereby granted, free of charge, to any person obtaining a copy of
- this software and associated documentation files (the "Software"), to deal in
- the Software without restriction, including without limitation the rights to
- use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
- of the Software, and to permit persons to whom the Software is furnished to do
- so, subject to the following conditions:
- 
- The above copyright notice and this permission notice shall be included in all
- copies or substantial portions of the Software.
- 
- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- SOFTWARE.
 --->
 
 <div class="h-full space-y-7 overflow-scroll px-12 py-5 text-lg leading-relaxed text-white">
@@ -55,27 +28,10 @@
 		utilizing TeachableMachine in your own application.
 	</p>
 	<!-- <p>
-		This project was created by <a
-			href="https://www.iancthompson.dev"
-			class="text-blue-400 hover:underline">Ian Thompson</a>
-		as a part of his work for the
+		This project was created by Sumanth Pandiri as a part of his work for the
 		<a href="https://idealab.sites.clemson.edu/" class="text-blue-400 hover:underline"
 			>IDEA Lab @ Clemson University</a
 		>.
 	</p> -->
 	<h2 class="text-4xl font-bold">License</h2>
-	<p>
-		MIT License Copyright (c) 2023 Nice Lion Technologies LLC Permission is hereby granted, free of
-		charge, to any person obtaining a copy of this software and associated documentation files (the
-		"Software"), to deal in the Software without restriction, including without limitation the
-		rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the
-		Software, and to permit persons to whom the Software is furnished to do so, subject to the
-		following conditions: The above copyright notice and this permission notice shall be included in
-		all copies or substantial portions of the Software. THE SOFTWARE IS PROVIDED "AS IS", WITHOUT
-		WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-		MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-		AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
-		ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
-		OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-	</p>
 </div>
